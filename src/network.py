@@ -39,7 +39,7 @@ class VAENetwork:
         kl_loss = 1 + self.latent_vector_output[1] - backend.square(self.latent_vector_output[0]) - backend.exp(self.latent_vector_output[1])
         kl_loss = -backend.sum(kl_loss, axis=-1)/2
 
-        model.add_loss(backend.mean(reconstruction_loss + k1_loss))
+        model.add_loss(backend.mean(reconstruction_loss + kl_loss))
         model.compile(optimizer='adam')
         return model
 
@@ -63,7 +63,7 @@ class VAENetwork:
                         strides=2,
                         padding='same')(conv_layer_2)
 
-        self.encoder.conv_shape = backend.int_shape(conv_layer_3)
+        self.encoder_conv_shape = backend.int_shape(conv_layer_3)
 
         fully_connected = Flatten()(conv_layer_3)
         fully_connected = Dense(VAENetwork.FINAL_LAYERS, activation='relu')(fully_connected)
@@ -111,13 +111,16 @@ class VAENetwork:
         self.model.fit(x=train_data, epochs=VAENetwork.NUM_EPOCHS, batch_size=VAENetwork.BATCH_SIZE,
                         validation_data=(test_data, None))
 
-    def generate_latent_vector(self):
+    def save_weights(self, save_dir):
+        self.model.save_weights(save_dir+"/vae.h5", overwrite=True)
 
-        mean = Dense(VAENetwork.LATENT_DIMENSIONS)(self.encoder_output)
-        log_var = Dense(VAENetwork.LATENT_DIMENSIONS)(self.decoder_output)
+    def generate_latent_vector(self, fully_connected):
+
+        mean = Dense(VAENetwork.LATENT_DIMENSIONS)(fully_connected)
+        log_var = Dense(VAENetwork.LATENT_DIMENSIONS)(fully_connected)
         latent_vector = Lambda(reparametrization)([mean, log_var])
         return (mean, log_var, latent_vector)
 
-
-    def getModel(self):
+    def get_model(self):
         return self.model
+        
