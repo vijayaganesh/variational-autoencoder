@@ -15,10 +15,10 @@ class VAENetwork:
     BATCH_SIZE = 128
     KERNEL_SIZE = 3
     NUM_FILTERS = 16
-    LATENT_DIMENSIONS = 10
-    FINAL_LAYERS = 100
-    LEARNING_RATE = 1e-5
-    NUM_EPOCHS = 30
+    LATENT_DIMENSIONS = 2
+    FINAL_LAYERS = 200
+    LEARNING_RATE = 1e-4
+    NUM_EPOCHS = 100
 
     def __init__(self, input_shape):
 
@@ -100,7 +100,7 @@ class VAENetwork:
         # deconv_layer_3 = Conv2DTranspose(filters=VAENetwork.NUM_FILTERS,
         #                     kernel_size=VAENetwork.KERNEL_SIZE,
         #                     activation='relu',
-        #                     strides=2,
+        #                     strides=2,    
         #                     padding='same')(deconv_layer_2)
         
         reconstructed_image = Conv2DTranspose(filters=1,

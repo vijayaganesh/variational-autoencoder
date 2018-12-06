@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 
 from network import VAENetwork
+from graph import GraphGenerator
 import mnist
 
 MNIST_DATA_PATH = "../data"
@@ -24,13 +25,9 @@ def main(args):
     x_train, _ = mnist_data.load_training()
     x_test, _ = mnist_data.load_testing()
 
-    x_train = np.array([np.reshape(np.array(x, dtype=np.uint8), (28,28,1)) for x in x_train])
-    x_test = np.array([np.reshape(np.array(x, dtype=np.uint8), (28,28,1)) for x in x_test])
-
-    cv2.imshow('img', np.reshape(x_test[45],(28, 28)))
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
+    x_train = np.array([np.reshape(np.array(x, dtype=np.uint8), (28, 28, 1)) for x in x_train])
+    x_test = np.array([np.reshape(np.array(x, dtype=np.uint8), (28, 28, 1)) for x in x_test])
+    
     if not os.path.exists(MODEL_WEIGHT_DIRECTORY):
         os.makedirs(MODEL_WEIGHT_DIRECTORY, exist_ok=True)
 
@@ -43,7 +40,17 @@ def main(args):
     vae_obj.load_weights(MODEL_WEIGHT_DIRECTORY)
     vae_model.summary()
 
-    img = vae_model.predict(np.reshape(x_test[45], (1, 28, 28, 1)))
+    graph_generator = GraphGenerator(vae_obj, mnist_data)
+    graph_generator.generate_latent_plot()
+
+    lat_model = vae_obj.encoder_model
+    print(lat_model.predict(np.reshape(x_test[32], (1, 28, 28, 1))))
+
+    img = vae_model.predict(np.reshape(x_test[32], (1, 28, 28, 1)))
+
+    cv2.imshow('img', np.reshape(x_test[32],(28, 28)))  
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     cv2.imshow('img', np.reshape(np.array(img, dtype=np.uint8), (28, 28)))
     cv2.waitKey(0)
