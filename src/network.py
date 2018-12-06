@@ -4,6 +4,7 @@ from keras.layers import Reshape, Conv2DTranspose
 from keras.losses import binary_crossentropy, mse
 from keras.models import Model
 from keras.utils import plot_model
+from keras.optimizers import RMSprop
 from utils import reparametrization
 from keras import backend
 
@@ -14,8 +15,9 @@ class VAENetwork:
     BATCH_SIZE = 128
     KERNEL_SIZE = 3
     NUM_FILTERS = 16
-    LATENT_DIMENSIONS = 2
+    LATENT_DIMENSIONS = 10
     FINAL_LAYERS = 100
+    LEARNING_RATE = 1e-5
     NUM_EPOCHS = 30
 
     def __init__(self, input_shape):
@@ -29,16 +31,22 @@ class VAENetwork:
 
     def create_model(self):
           
-        reconstructed_image = self.decoder_model(self.encoder_model(self.input)[2])
+        
+        reconstructed_image = Lambda(lambda x: x*255)(self.decoder_model(self.encoder_model(self.input)[2]))
+
         model = Model(self.input, reconstructed_image)
         reconstruction_loss = mse(backend.flatten(self.input),
                                                   backend.flatten(reconstructed_image))
+
+        reconstruction_loss *= 784
 
         kl_loss = 1 + 2*self.latent_vector_output[1] - backend.square(self.latent_vector_output[0]) - backend.exp(self.latent_vector_output[1])
         kl_loss = -backend.sum(kl_loss, axis=-1)/2
 
         model.add_loss(backend.mean(reconstruction_loss + kl_loss))
-        model.compile(optimizer='adam')
+
+        rmsprop = RMSprop(lr=VAENetwork.LEARNING_RATE)
+        model.compile(optimizer=rmsprop)
         return model
 
     def generate_encoder(self):
@@ -113,6 +121,9 @@ class VAENetwork:
 
     def save_weights(self, save_dir):
         self.model.save_weights(save_dir+"/vae.h5", overwrite=True)
+
+    def load_weights(self, save_dir):
+        self.model.load_weights(save_dir+"/vae.h5")
 
     def generate_latent_vector(self, fully_connected):
 

@@ -27,18 +27,27 @@ def main(args):
     x_train = np.array([np.reshape(np.array(x, dtype=np.uint8), (28,28,1)) for x in x_train])
     x_test = np.array([np.reshape(np.array(x, dtype=np.uint8), (28,28,1)) for x in x_test])
 
-    cv2.imshow('img', np.reshape(x_train[0],(28, 28)))
+    cv2.imshow('img', np.reshape(x_test[45],(28, 28)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    vae_obj = VAENetwork(x_train[0].shape)
-    # vae_model = vae_obj.get_model()
-    vae_obj.train(x_train, x_test)
-
     if not os.path.exists(MODEL_WEIGHT_DIRECTORY):
         os.makedirs(MODEL_WEIGHT_DIRECTORY, exist_ok=True)
-    
-    vae_obj.save_weights(MODEL_WEIGHT_DIRECTORY)
+
+    vae_obj = VAENetwork(x_train[2].shape)
+    vae_model = vae_obj.get_model()
+    # vae_obj.train(x_train, x_test)
+
+    # vae_obj.save_weights(MODEL_WEIGHT_DIRECTORY)
+
+    vae_obj.load_weights(MODEL_WEIGHT_DIRECTORY)
+    vae_model.summary()
+
+    img = vae_model.predict(np.reshape(x_test[45], (1, 28, 28, 1)))
+
+    cv2.imshow('img', np.reshape(np.array(img, dtype=np.uint8), (28, 28)))
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a VAE on top of the MNIST Data.")  
