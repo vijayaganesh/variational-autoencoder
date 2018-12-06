@@ -1,6 +1,8 @@
 import argparse
 import os
 import sys
+import cv2
+import numpy as np
 
 from network import VAENetwork
 import mnist
@@ -22,13 +24,21 @@ def main(args):
     x_train, _ = mnist_data.load_training()
     x_test, _ = mnist_data.load_testing()
 
-    vae_obj = VAENetwork((x_train.shape[1], x_train.shape[1], 1))
-    vae_model = vae_obj.get_model()
+    x_train = np.array([np.reshape(np.array(x, dtype=np.uint8), (28,28,1)) for x in x_train])
+    x_test = np.array([np.reshape(np.array(x, dtype=np.uint8), (28,28,1)) for x in x_test])
+
+    cv2.imshow('img', np.reshape(x_train[0],(28, 28)))
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    vae_obj = VAENetwork(x_train[0].shape)
+    # vae_model = vae_obj.get_model()
     vae_obj.train(x_train, x_test)
 
     if not os.path.exists(MODEL_WEIGHT_DIRECTORY):
-        os.makedirs(MODEL_WEIGHT_DIRECTORY, exist_ok= True)
+        os.makedirs(MODEL_WEIGHT_DIRECTORY, exist_ok=True)
     
+    vae_obj.save_weights(MODEL_WEIGHT_DIRECTORY)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a VAE on top of the MNIST Data.")  
