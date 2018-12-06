@@ -35,20 +35,21 @@ def main(args):
     vae_model = vae_obj.get_model()
     # vae_obj.train(x_train, x_test)
 
-    # vae_obj.save_weights(MODEL_WEIGHT_DIRECTORY)
+    # vae_obj.save_weights(MODEL_WEIGHT_DIRECTORY)  
 
     vae_obj.load_weights(MODEL_WEIGHT_DIRECTORY)
     vae_model.summary()
 
     graph_generator = GraphGenerator(vae_obj, mnist_data)
-    graph_generator.generate_latent_plot()
+    if vae_obj.LATENT_DIMENSIONS == 2:
+        graph_generator.generate_latent_plot()
 
-    lat_model = vae_obj.encoder_model
-    print(lat_model.predict(np.reshape(x_test[32], (1, 28, 28, 1))))
 
-    img = vae_model.predict(np.reshape(x_test[32], (1, 28, 28, 1)))
+    graph_generator.generate_reconstructed_image()
 
-    cv2.imshow('img', np.reshape(x_test[32],(28, 28)))  
+    img = vae_model.predict(np.reshape(x_test[45], (1, 28, 28, 1)))
+
+    cv2.imshow('img', np.reshape(x_test[45],(28, 28)))  
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 

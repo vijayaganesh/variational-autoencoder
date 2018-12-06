@@ -120,10 +120,10 @@ class VAENetwork:
                         validation_data=(test_data, None))
 
     def save_weights(self, save_dir):
-        self.model.save_weights(save_dir+"/vae.h5", overwrite=True)
+        self.model.save_weights(save_dir+"/vae"+str(VAENetwork.LATENT_DIMENSIONS)+".h5", overwrite=True)
 
     def load_weights(self, save_dir):
-        self.model.load_weights(save_dir+"/vae.h5")
+        self.model.load_weights(save_dir+"/vae"+str(VAENetwork.LATENT_DIMENSIONS)+".h5")
 
     def generate_latent_vector(self, fully_connected):
 
