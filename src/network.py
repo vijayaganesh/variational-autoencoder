@@ -30,8 +30,8 @@ class VAENetwork:
         self.model = self.create_model()
 
     def create_model(self):
-          
-        
+
+
         reconstructed_image = Lambda(lambda x: x*255)(self.decoder_model(self.encoder_model(self.input)[2]))
 
         model = Model(self.input, reconstructed_image)
@@ -51,19 +51,19 @@ class VAENetwork:
 
     def generate_encoder(self):
 
-        conv_layer_1 = Conv2D(filters=VAENetwork.NUM_FILTERS, 
+        conv_layer_1 = Conv2D(filters=VAENetwork.NUM_FILTERS,
                         kernel_size=VAENetwork.KERNEL_SIZE,
                         activation='relu',
                         strides=2,
                         padding='same')(self.input)
-        
-        conv_layer_2 = Conv2D(filters=VAENetwork.NUM_FILTERS*2, 
+
+        conv_layer_2 = Conv2D(filters=VAENetwork.NUM_FILTERS*2,
                         kernel_size=VAENetwork.KERNEL_SIZE,
                         activation='relu',
                         strides=2,
                         padding='same')(conv_layer_1)
 
-        # conv_layer_3 = Conv2D(filters=VAENetwork.NUM_FILTERS*4, 
+        # conv_layer_3 = Conv2D(filters=VAENetwork.NUM_FILTERS*4,
         #                 kernel_size=VAENetwork.KERNEL_SIZE,
         #                 activation='relu',
         #                 strides=2,
@@ -79,12 +79,12 @@ class VAENetwork:
         return encoder
 
     def generate_decoder(self):
-        
+
         decoder_input = Input(shape=(VAENetwork.LATENT_DIMENSIONS,))
         fully_connected = Dense(self.encoder_conv_shape[1]*self.encoder_conv_shape[2]*self.encoder_conv_shape[3], activation='relu')(decoder_input)
         deconv_input = Reshape((self.encoder_conv_shape[1], self.encoder_conv_shape[2], self.encoder_conv_shape[3]))(fully_connected)
 
-    
+
         deconv_layer_1 = Conv2DTranspose(filters=VAENetwork.NUM_FILTERS*4,
                             kernel_size=VAENetwork.KERNEL_SIZE,
                             activation='relu',
@@ -100,15 +100,15 @@ class VAENetwork:
         # deconv_layer_3 = Conv2DTranspose(filters=VAENetwork.NUM_FILTERS,
         #                     kernel_size=VAENetwork.KERNEL_SIZE,
         #                     activation='relu',
-        #                     strides=2,    
+        #                     strides=2,
         #                     padding='same')(deconv_layer_2)
-        
+
         reconstructed_image = Conv2DTranspose(filters=1,
                             kernel_size=VAENetwork.KERNEL_SIZE,
                             activation='sigmoid',
                             strides=1,
                             padding='same')(deconv_layer_2)
-                            
+
         decoder = Model(decoder_input, reconstructed_image)
 
         decoder.summary()
